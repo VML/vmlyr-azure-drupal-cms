@@ -1,0 +1,39 @@
+classy_paragraphs.classy_paragraphs_style.*:
+  type: config_entity
+  label: 'Classy paragraphs style config'
+  mapping:
+    id:
+      type: string
+      label: 'ID'
+    label:
+      type: label
+      label: 'Label'
+    classes:
+      type: string
+      label: 'Classes'
+    uuid:
+      type: string
+
+entity_reference_selection.classy_paragraphs:
+  type: entity_reference_selection.default
+  label: 'Classy paragraphs selection handler settings'
+  mapping:
+    filter:
+      type: mapping
+      label: 'Filter settings to select the classy_paragraphs entities'
+      mapping:
+        type:
+          type: string
+          label: 'Filter type'
+        negate:
+          type: boolean
+          label: 'Negate filter'
+        target_bundles:
+          type: sequence
+          label: 'Classy paragraphs styles'
+          sequence:
+            type: string
+            label: 'Classy paragraphs style'
+        starts_with:
+          type: string
+          label: 'Classy paragraphs machine name starts with'

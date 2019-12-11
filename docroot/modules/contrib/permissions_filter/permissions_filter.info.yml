@@ -1,0 +1,11 @@
+name: Permission Filter
+type: module
+description: Create a filter for permission page.
+# core: 8.x
+package: Other
+
+# Information added by Drupal.org packaging script on 2019-08-01
+version: '8.x-1.1'
+core: '8.x'
+project: 'permissions_filter'
+datestamp: 1564644791
