@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: slider__example
+label: Example
+classes: component-slider--example-class

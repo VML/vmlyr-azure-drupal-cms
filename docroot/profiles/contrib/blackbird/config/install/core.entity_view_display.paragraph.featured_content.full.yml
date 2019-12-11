@@ -1,0 +1,36 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.paragraph.full
+    - field.field.paragraph.featured_content.field_class_custom
+    - field.field.paragraph.featured_content.field_layout
+    - field.field.paragraph.featured_content.field_related_nodes
+    - field.field.paragraph.featured_content.field_style
+    - field.field.paragraph.featured_content.field_title
+    - paragraphs.paragraphs_type.featured_content
+id: paragraph.featured_content.full
+targetEntityType: paragraph
+bundle: featured_content
+mode: full
+content:
+  field_related_nodes:
+    weight: 1
+    label: hidden
+    settings:
+      link: true
+    third_party_settings: {  }
+    type: entity_reference_label
+    region: content
+  field_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden:
+  field_class_custom: true
+  field_layout: true
+  field_style: true

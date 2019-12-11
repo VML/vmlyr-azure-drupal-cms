@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies: {  }
+name: huge
+label: 'Huge - scaled (1260x1260)'
+effects:
+  b7e9c2bb-9caf-4e9e-87aa-90427ea1ebb9:
+    uuid: b7e9c2bb-9caf-4e9e-87aa-90427ea1ebb9
+    id: image_scale
+    weight: 1
+    data:
+      width: 1260
+      height: 1260
+      upscale: false
+pipeline: smushit

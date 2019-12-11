@@ -1,0 +1,16 @@
+langcode: en
+status: true
+dependencies: {  }
+id: remote_stage
+label: 'Remote - Stage'
+folder: ../config/www/remote_stage
+module:
+  dblog: 0
+  shield: 0
+  stage_file_proxy: 0
+theme: {  }
+blacklist: {  }
+graylist: {  }
+graylist_dependents: true
+graylist_skip_equal: true
+weight: 0

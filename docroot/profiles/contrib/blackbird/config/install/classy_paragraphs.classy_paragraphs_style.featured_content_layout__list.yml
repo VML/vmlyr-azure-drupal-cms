@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: featured_content_layout__list
+label: List
+classes: component-featured-content--layout-list

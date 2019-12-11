@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: embed_iframe__example
+label: Example
+classes: component-embed-iframe--example-class

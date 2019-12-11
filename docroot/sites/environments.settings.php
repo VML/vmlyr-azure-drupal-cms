@@ -24,13 +24,17 @@ $config['environment_indicator.indicator']['name'] = 'Local';
 
 // Determine passed-in environment.
 $site_environment = '';
+
 if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
   $site_environment = $_ENV['AH_SITE_ENVIRONMENT'];
-} elseif (isset($_ENV['PANTHEON_ENVIRONMENT'])) {
-    $site_environment = $_ENV['PANTHEON_ENVIRONMENT'];
-} elseif (isset($_ENV['SITE_ENVIRONMENT'])) {
+}
+elseif (isset($_ENV['PANTHEON_ENVIRONMENT'])) {
+  $site_environment = $_ENV['PANTHEON_ENVIRONMENT'];
+}
+elseif (isset($_ENV['SITE_ENVIRONMENT'])) {
   $site_environment = $_ENV['SITE_ENVIRONMENT'];
-} elseif (isset($_SERVER['SITE_ENVIRONMENT'])) {
+}
+elseif (isset($_SERVER['SITE_ENVIRONMENT'])) {
   $site_environment = $_SERVER['SITE_ENVIRONMENT'];
 }
 
@@ -66,6 +70,48 @@ switch ($site_environment) {
     $config['config_split.config_split.local']['status'] = TRUE;
     break;
 }
+
+// ---------------------------------------
+// Azure App Service connection ---- BEGIN
+// ---------------------------------------
+$dbfullhost = '';
+$dbhost = '';
+$dbname = '';
+$dbusername = '';
+$dbpassword = '';
+
+foreach ($_SERVER as $key => $value) {
+  if (strpos($key, 'MYSQLCONNSTR_') !== 0) {
+    continue;
+  }
+
+  $dbfullhost = preg_replace("/^.*Data Source=(.+?);.*$/", "\\1", $value);
+  $dbhost = substr($dbfullhost,0, strpos($dbhost,':'));
+  $dbname = preg_replace("/^.*Database=(.+?);.*$/", "\\1", $value);
+  $dbusername = preg_replace("/^.*User Id=(.+?);.*$/", "\\1", $value);
+  $dbpassword = preg_replace("/^.*Password=(.+?)$/", "\\1", $value);
+}
+
+$port =   getenv('WEBSITE_MYSQL_PORT');
+
+if (empty($port)) {
+  $port = 3306;
+}
+
+$databases['default']['default'] = [
+  'database' => $dbname,
+  'username' => $dbusername,
+  'password' => $dbpassword,
+  'prefix' => '',
+  'host' => $dbhost,
+  'port' => $port ,
+  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+  'driver' => 'mysql',
+];
+
+// ---------------------------------------
+// Azure App Service connection ---- END
+// ---------------------------------------
 
 // Enable docksal settings overrides.
 if (file_exists($app_root . '/' . $site_path . '/settings.docksal.php')) {

@@ -1,0 +1,13 @@
+{
+  "name": "vmlyr-drupal/bazo",
+  "description": "A base theme that adds helpful functionality to child-themes.",
+  "license": "GPL-2.0+",
+  "type": "drupal-theme",
+  "homepage": "https://github.com/VML/Drupal-Theme-Bazo",
+  "authors": [
+    {
+      "name": "Garrett Rathbone",
+      "email": "garrett.rathbone@vml.com"
+    }
+  ]
+}

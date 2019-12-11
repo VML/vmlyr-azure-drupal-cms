@@ -1,0 +1,13 @@
+{
+  "name": "vmlyr-drupal/blackbird",
+  "description": "An opinionated Drupal profile with helpful components to take care of repeated tasks for new websites.",
+  "license": "GPL-2.0+",
+  "type": "drupal-profile",
+  "homepage": "https://github.com/VML/Drupal-Profile-Blackbird",
+  "authors": [
+    {
+      "name": "Garrett Rathbone",
+      "email": "garrett.rathbone@vml.com"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+langcode: en
+status: true
+dependencies: {  }
+id: local
+label: Local
+folder: ../config/www/local
+module:
+  dblog: 0
+  devel: 0
+  stage_file_proxy: 0
+  views_ui: 0
+theme: {  }
+blacklist: {  }
+graylist:
+  - advagg.settings
+  - advagg_css_minify.settings
+  - advagg_js_minify.settings
+  - system.performance
+graylist_dependents: true
+graylist_skip_equal: false
+weight: -5

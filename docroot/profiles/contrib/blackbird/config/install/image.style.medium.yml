@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies: {  }
+name: medium
+label: 'Medium - scaled (720x720)'
+effects:
+  88412e51-1261-4e26-a79c-e41689635ca0:
+    uuid: 88412e51-1261-4e26-a79c-e41689635ca0
+    id: image_scale
+    weight: 1
+    data:
+      width: 720
+      height: 720
+      upscale: false
+pipeline: smushit

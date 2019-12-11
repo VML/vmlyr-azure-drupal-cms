@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - menu_ui
+third_party_settings:
+  menu_ui:
+    available_menus:
+      - main
+    parent: 'main:'
+name: 'Landing Page'
+type: landing_page
+description: 'A <em>Landing Page</em> is a central place for all content around one topic to live. Landing Pages have suite of components available to help build complex pages.'
+help: ''
+new_revision: true
+preview_mode: 1
+display_submitted: false

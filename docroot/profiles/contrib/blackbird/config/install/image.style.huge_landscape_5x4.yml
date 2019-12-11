@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: huge_landscape_5x4
+label: 'Huge - landscape 5:4 (1260x1008)'
+effects:
+  2e94d33c-cbbb-4369-8c22-b10a224579a3:
+    uuid: 2e94d33c-cbbb-4369-8c22-b10a224579a3
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 1260
+      height: 1008
+      crop_type: focal_point
+pipeline: smushit

@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+machine: local
+description: null
+name: Local
+url: 'https://www.bazo.docksal'
+fg_color: '#e6e6e6'
+bg_color: '#0080ff'

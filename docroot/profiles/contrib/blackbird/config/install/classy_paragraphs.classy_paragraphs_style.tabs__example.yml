@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: tabs__example
+label: Example
+classes: component-tabs--example-class

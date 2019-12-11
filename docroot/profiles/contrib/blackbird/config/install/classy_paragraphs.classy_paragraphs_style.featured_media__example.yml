@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: featured_media__example
+label: Example
+classes: component-featured-media--example

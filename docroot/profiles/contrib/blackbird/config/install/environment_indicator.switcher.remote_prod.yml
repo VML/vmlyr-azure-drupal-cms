@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+machine: remote_prod
+description: null
+name: Prod
+url: 'https://www.bazo.com'
+fg_color: '#d0d0d0'
+bg_color: '#0d0d0d'

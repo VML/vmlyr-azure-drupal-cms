@@ -1,0 +1,13 @@
+{
+  "name": "vmlyr-drupal/biplane",
+  "description": "Common configuration to fast-track site setup and development.",
+  "license": "GPL-2.0+",
+  "type": "drupal-profile",
+  "homepage": "https://github.com/VML/Drupal-Profile-Biplane",
+  "authors": [
+    {
+      "name": "Garrett Rathbone",
+      "email": "garrett.rathbone@vml.com"
+    }
+  ]
+}

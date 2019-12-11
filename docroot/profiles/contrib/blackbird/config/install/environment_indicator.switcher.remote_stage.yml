@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies: {  }
+machine: remote_stage
+description: null
+name: Stage
+url: 'https://stage-www.bazo.com'
+fg_color: '#e6e6e6'
+bg_color: '#008040'

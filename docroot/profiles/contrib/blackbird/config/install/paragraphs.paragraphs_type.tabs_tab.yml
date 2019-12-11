@@ -1,0 +1,8 @@
+langcode: en
+status: true
+dependencies: {  }
+id: tabs_tab
+label: 'Tabs: Tab'
+icon_uuid: null
+description: ''
+behavior_plugins: {  }

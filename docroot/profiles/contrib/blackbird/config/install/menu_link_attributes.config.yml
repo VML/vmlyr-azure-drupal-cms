@@ -1,0 +1,13 @@
+attributes:
+  class:
+    label: ''
+    description: ''
+  target:
+    label: ''
+    description: ''
+    options:
+      _blank: 'New window (_blank)'
+      _self: 'Same window (_self)'
+  container_class:
+    label: 'List-item classes'
+    description: 'Classes added to the parent list-item element'

@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: content__example
+label: Example
+classes: component-content--example-class

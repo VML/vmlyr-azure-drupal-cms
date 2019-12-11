@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: featured_content_layout__grid
+label: Grid
+classes: component-featured-content--layout-grid

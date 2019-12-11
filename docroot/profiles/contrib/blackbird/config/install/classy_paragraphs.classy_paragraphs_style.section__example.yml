@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: section__example
+label: Example
+classes: component-section--example-class

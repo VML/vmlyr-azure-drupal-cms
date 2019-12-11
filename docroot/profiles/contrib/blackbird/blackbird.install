@@ -1,0 +1,430 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Blackbird install profile.
+ */
+
+use Drupal\Core\Config\ConfigImporter;
+use Drupal\Core\Config\FileStorage;
+use Drupal\Core\Config\StorageComparer;
+use Drupal\Core\Config\StorageInterface;
+use Drupal\config_filter\Config\FilteredStorage;
+use Drupal\user\Entity\User;
+use Drupal\user\RoleInterface;
+use Drupal\shortcut\Entity\Shortcut;
+use Symfony\Component\Filesystem\Filesystem;
+use Webmozart\PathUtil\Path;
+
+/**
+ * Implements hook_install().
+ *
+ * Perform actions to set up the site for this profile.
+ *
+ * @see system_install()
+ */
+function blackbird_install() {
+  // Set front page to "node".
+  \Drupal::configFactory()->getEditable('system.site')->set('page.front', '/node')->save(TRUE);
+
+  // Allow visitor account creation with administrative approval.
+  $user_settings = \Drupal::configFactory()->getEditable('user.settings');
+  $user_settings->set('register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)->save(TRUE);
+
+  // Assign user 1 the "administrator" role.
+  $user = User::load(1);
+  $user->roles[] = 'administrator';
+  $user->save();
+
+  // We install some menu links, so we have to rebuild the router, to ensure the
+  // menu links are valid.
+  \Drupal::service('router.builder')->rebuildIfNeeded();
+
+  // Allow authenticated users to use shortcuts.
+  user_role_grant_permissions(RoleInterface::AUTHENTICATED_ID, ['access shortcuts']);
+
+  // Populate the default shortcut set.
+  $shortcut = Shortcut::create([
+    'shortcut_set' => 'default',
+    'title' => t('Add content'),
+    'weight' => -20,
+    'link' => ['uri' => 'internal:/node/add'],
+  ]);
+  $shortcut->save();
+
+  $shortcut = Shortcut::create([
+    'shortcut_set' => 'default',
+    'title' => t('All content'),
+    'weight' => -19,
+    'link' => ['uri' => 'internal:/admin/content'],
+  ]);
+  $shortcut->save();
+
+  // Allow all users to use search.
+  user_role_grant_permissions(RoleInterface::ANONYMOUS_ID, ['search content']);
+  user_role_grant_permissions(RoleInterface::AUTHENTICATED_ID, ['search content']);
+
+  // Enable the admin theme.
+  \Drupal::configFactory()->getEditable('node.settings')->set('use_admin_theme', TRUE)->save(TRUE);
+}
+
+/**
+ * Implements hook_install_tasks_alter().
+ */
+function blackbird_install_tasks_alter(&$tasks, $install_state) {
+  $tasks['blackbird_install_tasks_clean'] = [
+    'display_name' => t('Cleanup and finalize install'),
+    'type' => 'batch',
+  ];
+  $tasks['blackbird_install_tasks_config_export'] = [
+    'display_name' => t('Export default configuration'),
+    'type' => 'batch',
+  ];
+  $tasks['blackbird_install_tasks_config_import'] = [
+    'display_name' => t('Import local configuration'),
+    'type' => 'batch',
+  ];
+}
+
+/**
+ * Profile install task added in blackbird_install_tasks_alter().
+ *
+ * This process does final configuration cleanup before configuration export and
+ * reimport.
+ */
+function blackbird_install_tasks_clean() {
+  // Return batch process information.
+  return [
+    'operations' => [
+      ['_blackbird_install_tasks_clean_config_split_paths', []],
+      ['_blackbird_install_tasks_clean_config_split_duplication', []],
+      ['_blackbird_install_tasks_clean_updates', []]
+    ],
+    'title' => t('Installation clean up'),
+  ];
+}
+
+/**
+ * Profile install batch process called in blackbird_install_tasks_clean().
+ *
+ * Updates config split directories to be relevant to a sites sync directory.
+ */
+function _blackbird_install_tasks_clean_config_split_paths(&$context) {
+  $path_sync = config_get_config_directory(CONFIG_SYNC_DIRECTORY);
+
+  // Update existing split folder config to match this site's sync directory.
+  foreach (\Drupal::entityTypeManager()->getStorage('config_split')->loadMultiple() as $config_split) {
+    /** @var \Drupal\config_split\Entity\ConfigSplitEntityInterface $config_split */
+    $path_sync_config_split = Path::makeRelative($path_sync . '/../' . $config_split->id(), \Drupal::root());
+    $config_split->set('folder', $path_sync_config_split);
+    $config_split->set('status', TRUE);
+    $config_split->save();
+  }
+
+  // Update batch information
+  $context['results'][] = '_blackbird_install_tasks_clean_config_split_paths';
+  $context['message'] = t('Updated configuration split directory paths');
+}
+
+/**
+ * Profile install batch process called in blackbird_install_tasks_clean().
+ *
+ * This duplicates profile Config Split directories into their corresponding
+ * directories in the site config folder.
+ */
+function _blackbird_install_tasks_clean_config_split_duplication(&$context) {
+  $filesystem = new Filesystem();
+
+  // Get directory paths.
+  $path_profile = drupal_get_path('profile', 'blackbird');
+  $path_profile_config_splits = $path_profile . '/config/splits';
+  $path_sync = config_get_config_directory(CONFIG_SYNC_DIRECTORY);
+
+  $directory_profile_config_splits = new DirectoryIterator($path_profile_config_splits);
+  foreach ($directory_profile_config_splits as $fileinfo) {
+    // Make sure the 'file' is a split directory.
+    if ($fileinfo->isDir() && !$fileinfo->isDot()) {
+      $split_name = $fileinfo->getFilename();
+
+      // Config split paths.
+      $path_profile_config_split = Path::canonicalize($path_profile_config_splits . '/' . $split_name);
+      $path_sync_config_split = Path::canonicalize($path_sync . '/../' . $split_name);
+
+      // Create folder if it doesn't exist.
+      if (!$filesystem->exists($path_sync_config_split)) {
+        $filesystem->mkdir($path_sync_config_split);
+      }
+
+      // Copy files in profile split directory into site split directory,
+      $directory_profile_config_split = new DirectoryIterator($path_profile_config_split);
+      foreach ($directory_profile_config_split as $config) {
+        if ($config->isFile()) {
+          $filesystem->copy($config->getRealPath(), $path_sync_config_split . '/' . $config->getFilename());
+        }
+      }
+    }
+  }
+
+  // Update batch information
+  $context['results'][] = '_blackbird_install_tasks_clean_config_split_duplication';
+  $context['message'] = t('Replicated split configuration');
+}
+
+/**
+ * Profile install batch process called in blackbird_install_tasks_clean().
+ *
+ * This updates various configuration on the site.
+ */
+function _blackbird_install_tasks_clean_updates(&$context) {
+  $filesystem = new Filesystem();
+
+  // Get directory paths.
+  $path_sync = config_get_config_directory(CONFIG_SYNC_DIRECTORY);
+
+  // Load all environment indicators.
+  $environment_indicators = \Drupal::entityTypeManager()->getStorage('environment_indicator')->loadMultiple();
+
+  // Update existing split folder config to match this site's sync directory.
+  foreach (\Drupal::entityTypeManager()->getStorage('config_split')->loadMultiple() as $config_split) {
+    // Config split paths.
+    $path_sync_config_split = Path::canonicalize($path_sync . '/../' . $config_split->id());
+
+    // Update each environment's stage_file_proxy URL.
+    $path_sync_stage_file_proxy = $path_sync_config_split . '/stage_file_proxy.settings.yml';
+    if (file_exists($path_sync_stage_file_proxy) && $stage_file_proxy_settings = file_get_contents($path_sync_stage_file_proxy)) {
+      $stage_file_proxy_settings = \Drupal\Core\Serialization\Yaml::decode($stage_file_proxy_settings);
+
+      // Use the environment's next relative environment URL.
+      switch($config_split->id()) {
+        case 'local':
+          $next_environment_id = 'remote_dev';
+          break;
+
+        case 'remote_dev':
+          $next_environment_id = 'remote_stage';
+          break;
+
+        case 'remote_stage':
+          $next_environment_id = 'remote_prod';
+          break;
+        default:
+          $next_environment_id = NULL;
+      }
+
+      // Set the URL from the environment indicator.
+      if (!is_null($next_environment_id) && array_key_exists($next_environment_id, $environment_indicators)) {
+        $stage_file_proxy_settings['origin'] = $environment_indicators[$next_environment_id]->get('url');
+      }
+
+      // Attempt to update the stage_file_proxy configuration file.
+      try {
+        $filesystem->dumpFile($path_sync_stage_file_proxy, \Drupal\Core\Serialization\Yaml::encode($stage_file_proxy_settings));
+      } catch (Exception $exception) {
+        // Do nothing; just don't want to interrupt the install process.
+      }
+    }
+  }
+
+  // Update batch information
+  $context['results'][] = '_blackbird_install_tasks_clean_updates';
+  $context['message'] = t('Updated site settings');
+}
+
+/**
+ * Profile install task added in blackbird_install_tasks_alter().
+ *
+ * This finds profile Config Split directories and adds them to a batch process
+ * to copy them into their corresponding site config directories. This is
+ * required since the configuration loaded into the site from the profile
+ * install folder is only the default configuration.
+ */
+function blackbird_install_tasks_config_split() {
+  // Get directory paths.
+  $path_profile = drupal_get_path('profile', 'blackbird');
+  $path_profile_config_splits = $path_profile . '/config/splits';
+  $path_sync = config_get_config_directory(CONFIG_SYNC_DIRECTORY);
+
+  // Update existing split folder config to match this site's sync directory.
+  foreach (\Drupal::entityTypeManager()->getStorage('config_split')->loadMultiple() as $config_split) {
+    /** @var \Drupal\config_split\Entity\ConfigSplitEntityInterface $config_split */
+    $path_sync_config_split = Path::makeRelative($path_sync . '/../' . $config_split->id(), \Drupal::root());
+    $config_split->set('folder', $path_sync_config_split);
+    $config_split->set('status', TRUE);
+    $config_split->save();
+ }
+
+  // Copy over config from profile split directories into corresponding sync
+  // directories.
+  $operations = [];
+  $directory_profile_config_splits = new DirectoryIterator($path_profile_config_splits);
+  foreach ($directory_profile_config_splits as $fileinfo) {
+    // Make sure the 'file' is a split directory.
+    if ($fileinfo->isDir() && !$fileinfo->isDot()) {
+      $operations[] = [
+        '_blackbird_install_tasks_config_split',
+        [$fileinfo->getFilename()]
+      ];
+    }
+  }
+
+  // Return batch process information.
+  return [
+    'operations' => $operations,
+    'title' => t('Replicating configuration splits'),
+    'error_message' => t('Configuration replication has encountered an error.'),
+  ];
+}
+
+/**
+ * Profile install batch process called in _blackbird_install_tasks_config_split().
+ *
+ * This duplicates a profile Config Split directory into its corresponding
+ * directory in the site config folder.
+ */
+function _blackbird_install_tasks_config_split($split_name, &$context) {
+  $filesystem = new Filesystem();
+
+  // Add items to batch sandbox if they don't already exist
+  if (!isset($context['sandbox']['environment_indicator_url'])) {
+    $context['sandbox']['environment_indicator_url'] = \Drupal::entityTypeManager()->getStorage('environment_indicator')->load('remote_prod')->get('url');
+  }
+
+  // Get directory paths.
+  $path_profile = drupal_get_path('profile', 'blackbird');
+  $path_profile_config_splits = $path_profile . '/config/splits';
+  $path_sync = config_get_config_directory(CONFIG_SYNC_DIRECTORY);
+
+  // Config split paths.
+  $path_profile_config_split = Path::canonicalize($path_profile_config_splits . '/' . $split_name);
+  $path_sync_config_split = Path::canonicalize($path_sync . '/../' . $split_name);
+
+  // Create folder if it doesn't exist.
+  if (!$filesystem->exists($path_sync_config_split)) {
+    $filesystem->mkdir($path_sync_config_split);
+  }
+
+  // Copy files in profile split directory into site split directory,
+  $directory_profile_config_split = new DirectoryIterator($path_profile_config_split);
+  foreach ($directory_profile_config_split as $config) {
+    if ($config->isFile()) {
+      $filesystem->copy($config->getRealPath(), $path_sync_config_split . '/' . $config->getFilename());
+    }
+  }
+
+  // Update current stage_file_proxy file to site's production url.
+  $path_sync_stage_file_proxy = $path_sync_config_split . '/stage_file_proxy.settings.yml';
+  if ($stage_file_proxy_settings = file_get_contents($path_sync_stage_file_proxy)) {
+    $stage_file_proxy_settings = \Drupal\Core\Serialization\Yaml::decode($stage_file_proxy_settings);
+    $stage_file_proxy_settings['origin'] = $context['sandbox']['environment_indicator_url'];
+    try {
+      $filesystem->dumpFile($path_sync_stage_file_proxy, \Drupal\Core\Serialization\Yaml::encode($stage_file_proxy_settings));
+    } catch (Exception $exception) {
+      // Do nothing; just don't want to interrupt the install process.
+    }
+  }
+
+  // Update batch information
+  $context['results'][] = $split_name;
+  $context['message'] = t('Replicated %name configuration.', [
+    '%name' => $split_name,
+  ]);
+}
+
+/**
+ * Profile install task added in blackbird_install_tasks_alter().
+ *
+ * This task does an initial export into the site's default config folder. This
+ * primes the site to allow a config import after form submission which switches
+ * the site to the local version of the configuration.
+ */
+function blackbird_install_tasks_config_export() {
+  // Get directory path.
+  $path_sync = Path::canonicalize(config_get_config_directory(CONFIG_SYNC_DIRECTORY));
+
+  // Load storage instances.
+  /** @var \Drupal\Core\Config\StorageInterface $source_storage */
+  $source_storage = Drupal::service('config.storage');
+  $target_storage = new FileStorage($path_sync);
+
+  // Export each configuration file.
+  $operations = [];
+  foreach ($source_storage->listAll() as $name) {
+    $operations[] = [
+      '_blackbird_install_tasks_config_export',
+      [
+        $name,
+        $source_storage,
+        $target_storage
+      ]
+    ];
+  }
+
+  // Return batch process information.
+  return [
+    'operations' => $operations,
+    'title' => t('Exporting site configuration'),
+    'progress_message' => t('Completed step @current of @total.'),
+    'error_message' => t('Configuration export has encountered an error.'),
+  ];
+}
+
+/**
+ * Profile install batch process called in blackbird_install_tasks_config_export().
+ *
+ * This exports a specific configuration item on a site.
+ */
+function _blackbird_install_tasks_config_export($name, StorageInterface $source_storage, StorageInterface $target_storage, array &$context) {
+  $target_storage->write($name, $source_storage->read($name));
+
+  // Update batch information
+  $context['results'][] = $name;
+}
+
+/**
+ * Profile install task added in blackbird_install_tasks_alter().
+ *
+ * This task imports the local configuration into the site after site install.
+ */
+function blackbird_install_tasks_config_import() {
+  /** @var \Drupal\config_filter\ConfigFilterManagerInterface $config_filter_manager */
+  $config_filter_manager = \Drupal::service('plugin.manager.config_filter');
+  $config_manager = \Drupal::service('config.manager');
+
+  // Filter the active storage so we only import the split.
+  /** @var \Drupal\config_filter\Plugin\ConfigFilterInterface $filter */
+  $filter = $config_filter_manager->getFilterInstance('config_split:local');
+  $storage_active = Drupal::service('config.storage');
+  $storage_filtered = new FilteredStorage($storage_active, [$filter]);
+  $storage_comparer = new StorageComparer($storage_filtered, $storage_active, $config_manager);
+
+  // Create batch definition.
+  $batch = [
+    'operations' => [],
+    'finished' => [\Drupal\config\Form\ConfigSync::class, 'finishBatch'],
+    'title' => t('Importing local configuration'),
+    'init_message' => t('Starting configuration import.'),
+    'progress_message' => t('Completed step @current of @total.'),
+    'error_message' => t('Configuration import has encountered an error.'),
+  ];
+
+  // Add items to batch.
+  if ($storage_comparer->createChangelist()->hasChanges()) {
+    $config_importer = new ConfigImporter(
+      $storage_comparer,
+      \Drupal::service('event_dispatcher'),
+      $config_manager,
+      \Drupal::service('lock'),
+      \Drupal::service('config.typed'),
+      \Drupal::service('module_handler'),
+      \Drupal::service('module_installer'),
+      \Drupal::service('theme_handler'),
+      \Drupal::service('string_translation')
+    );
+
+    foreach ($config_importer->initialize() as $sync_step) {
+      $batch['operations'][] = [[\Drupal\config\Form\ConfigSync::class, 'processBatch'], [$config_importer, $sync_step]];
+    }
+  }
+
+  return $batch;
+}

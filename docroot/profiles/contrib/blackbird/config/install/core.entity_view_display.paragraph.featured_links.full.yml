@@ -1,0 +1,41 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.paragraph.full
+    - field.field.paragraph.featured_links.field_class_custom
+    - field.field.paragraph.featured_links.field_links
+    - field.field.paragraph.featured_links.field_style
+    - field.field.paragraph.featured_links.field_title
+    - paragraphs.paragraphs_type.featured_links
+  module:
+    - linkit
+id: paragraph.featured_links.full
+targetEntityType: paragraph
+bundle: featured_links
+mode: full
+content:
+  field_links:
+    weight: 1
+    label: hidden
+    settings:
+      trim_length: 80
+      url_only: false
+      url_plain: false
+      rel: ''
+      target: ''
+      linkit_profile: default
+    third_party_settings: {  }
+    type: linkit
+    region: content
+  field_title:
+    weight: 0
+    label: hidden
+    settings:
+      link_to_entity: false
+    third_party_settings: {  }
+    type: string
+    region: content
+hidden:
+  field_class_custom: true
+  field_style: true

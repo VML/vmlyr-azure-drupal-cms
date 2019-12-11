@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: featured_links__example
+label: Example
+classes: component-list-links--example

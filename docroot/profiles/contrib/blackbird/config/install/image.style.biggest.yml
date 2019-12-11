@@ -1,0 +1,15 @@
+langcode: en
+status: true
+dependencies: {  }
+name: biggest
+label: 'Biggest – scaled (1620x1620)'
+effects:
+  ab3b7625-50b6-4bfa-8f6e-48bc5eecbb8f:
+    uuid: ab3b7625-50b6-4bfa-8f6e-48bc5eecbb8f
+    id: image_scale
+    weight: 1
+    data:
+      width: 1620
+      height: 1620
+      upscale: false
+pipeline: smushit

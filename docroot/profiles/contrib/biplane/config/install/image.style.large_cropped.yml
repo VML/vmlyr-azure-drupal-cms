@@ -1,0 +1,17 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - focal_point
+name: large_cropped
+label: 'Large (480x480, cropped)'
+effects:
+  7dade405-d644-4080-8c9c-2755e07135f1:
+    uuid: 7dade405-d644-4080-8c9c-2755e07135f1
+    id: focal_point_scale_and_crop
+    weight: 1
+    data:
+      width: 480
+      height: 480
+      crop_type: focal_point
+pipeline: smushit

@@ -1,0 +1,19 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - core.entity_view_mode.node.block_title
+    - field.field.node.page.body
+    - field.field.node.page.field_components
+    - node.type.page
+  module:
+    - user
+id: node.page.block_title
+targetEntityType: node
+bundle: page
+mode: block_title
+content: {  }
+hidden:
+  body: true
+  field_components: true
+  links: true

@@ -1,0 +1,12 @@
+langcode: en
+status: true
+dependencies: {  }
+name: smushit
+label: Smushit
+processors:
+  5a879de1-0110-4a45-afff-77858687fc0d:
+    uuid: 5a879de1-0110-4a45-afff-77858687fc0d
+    id: resmushit
+    weight: 1
+    data:
+      quality: ''

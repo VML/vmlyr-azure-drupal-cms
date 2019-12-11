@@ -1,0 +1,6 @@
+langcode: en
+status: true
+dependencies: {  }
+id: featured_media_layout__slider
+label: Slider
+classes: component-featured-media--layout-slider
