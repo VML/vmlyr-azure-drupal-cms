@@ -96,6 +96,7 @@
         "drupal/video_embed_field": "^2.0",
         "drupal/viewsreference": "^2.0@alpha",
         "drush/drush": "^9.0.0",
+        "symfony/http-foundation": "^3.4.35",
         "topfloor/composer-cleanup-vcs-dirs": "^1.0",
         "vlucas/phpdotenv": "^2.4",
         "vmlyr-drupal/bazo": "^8.0",
