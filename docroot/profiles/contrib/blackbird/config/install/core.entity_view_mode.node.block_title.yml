@@ -1,9 +1,0 @@
-langcode: en
-status: true
-dependencies:
-  module:
-    - node
-id: node.block_title
-label: 'Block Title'
-targetEntityType: node
-cache: true
