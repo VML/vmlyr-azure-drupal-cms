@@ -127,6 +127,8 @@ function getDrupalDbInfoFromAzure() {
 if (!isset($databases['default']['default'])) {
   $databases['default']['default'] = getDrupalDbInfoFromAzure();
   echo "SERVER:\n<br>\n<pre>" . print_r($_SERVER, true) . "</pre>\n<br>\n";
+  echo "ENVR:\n<br>\n<pre>" . print_r($_ENV, true) . "</pre>\n<br>\n";
+  echo "GLOBALS:\n<br>\n<pre>" . print_r($GLOBALS, true) . "</pre>\n<br>\n";
   echo "Database:\n<br>\n<pre>" . print_r($databases, true) . "</pre>\n<br>\n";
   die();
 }
