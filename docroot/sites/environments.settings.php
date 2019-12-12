@@ -104,7 +104,7 @@ function processAzureConnectionString($value) {
 }
 
 function getAzureConnectionString() {
-  $connstr = getenv('MYSQLCONNSTR_MySqlDB');
+  $connstr = getenv('MYSQLCONNSTR_defaultConnection');
 
   if (empty($connstr)) {
     foreach ($_ENV as $key => $value) {
