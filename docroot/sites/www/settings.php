@@ -3,6 +3,14 @@
 // @codingStandardsIgnoreFile
 
 /**
+ * Azure App Service specific change
+ * ------------------------------------
+ */
+if (isset($GLOBALS['request']) && '/docroot/index.php' === $GLOBALS['request']->server->get('SCRIPT_NAME')) {
+  $GLOBALS['request']->server->set('SCRIPT_NAME', '/index.php');
+}
+
+/**
  * @file
  * Drupal site-specific configuration file.
  *
