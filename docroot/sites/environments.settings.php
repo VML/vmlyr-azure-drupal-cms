@@ -125,7 +125,7 @@ function getDrupalDbInfoFromAzure() {
 }
 
 if (!isset($databases['default']['default'])) {
-  $databases['default']['default'] = getDrupalDbInfoFromAzure();;
+  $databases['default']['default'] = getDrupalDbInfoFromAzure();
 }
 
 // ---------------------------------------
