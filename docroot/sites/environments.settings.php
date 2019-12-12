@@ -72,14 +72,14 @@ switch ($site_environment) {
 }
 
 // Enable docksal settings overrides.
-if (file_exists($app_root . '/' . $site_path . '/settings.docksal.php')) {
-  include $app_root . '/' . $site_path . '/settings.docksal.php';
-}
-
-// Enable local settings overrides.
-if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
-  include $app_root . '/' . $site_path . '/settings.local.php';
-}
+//if (file_exists($app_root . '/' . $site_path . '/settings.docksal.php')) {
+//  include $app_root . '/' . $site_path . '/settings.docksal.php';
+//}
+//
+//// Enable local settings overrides.
+//if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+//  include $app_root . '/' . $site_path . '/settings.local.php';
+//}
 
 // ---------------------------------------
 // Azure App Service connection ---- BEGIN
@@ -126,6 +126,7 @@ function getDrupalDbInfoFromAzure() {
 
 if (!isset($databases['default']['default'])) {
   $databases['default']['default'] = getDrupalDbInfoFromAzure();
+  echo "SERVER:\n<br>\n" . print_r($_SERVER, true) . "\n<br>\n";
   echo "Databases...\n<br>\n";
   die(print_r($databases));
 }
