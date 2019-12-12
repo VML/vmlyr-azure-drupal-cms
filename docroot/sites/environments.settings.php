@@ -72,14 +72,14 @@ switch ($site_environment) {
 }
 
 // Enable docksal settings overrides.
-//if (file_exists($app_root . '/' . $site_path . '/settings.docksal.php')) {
-//  include $app_root . '/' . $site_path . '/settings.docksal.php';
-//}
-//
-//// Enable local settings overrides.
-//if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
-//  include $app_root . '/' . $site_path . '/settings.local.php';
-//}
+if (file_exists($app_root . '/' . $site_path . '/settings.docksal.php')) {
+  include $app_root . '/' . $site_path . '/settings.docksal.php';
+}
+
+// Enable local settings overrides.
+if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
+  include $app_root . '/' . $site_path . '/settings.local.php';
+}
 
 // ---------------------------------------
 // Azure App Service connection ---- BEGIN
