@@ -84,43 +84,48 @@ if (file_exists($app_root . '/' . $site_path . '/settings.local.php')) {
 // ---------------------------------------
 // Azure App Service connection ---- BEGIN
 // ---------------------------------------
-if (!isset($databases['default']['default'])) {
-  $dbfullhost = '';
-  $dbhost = '';
-  $dbname = '';
-  $dbusername = '';
-  $dbpassword = '';
-
-  foreach ($_SERVER as $key => $value) {
-    if (strpos($key, 'MYSQLCONNSTR_') !== 0) {
-      continue;
-    }
-
-    echo "Key: $key - Value: $value\n<br>\n";
-
-    $dbfullhost = preg_replace("/^.*Data Source=(.+?);.*$/", "\\1", $value);
-    $dbhost = substr($dbfullhost,0, strpos($dbhost,':'));
-    $dbname = preg_replace("/^.*Database=(.+?);.*$/", "\\1", $value);
-    $dbusername = preg_replace("/^.*User Id=(.+?);.*$/", "\\1", $value);
-    $dbpassword = preg_replace("/^.*Password=(.+?)$/", "\\1", $value);
-  }
-
+function processAzureConnectionString($value) {
   $port = getenv('WEBSITE_MYSQL_PORT');
 
   if (empty($port)) {
     $port = 3306;
   }
 
-  $databases['default']['default'] = [
-    'database' => $dbname,
-    'username' => $dbusername,
-    'password' => $dbpassword,
-    'prefix' => '',
-    'host' => $dbhost,
-    'port' => $port ,
+  return [
+    'host' => preg_replace("/^.*Data Source=(.+?);.*$/", "\\1", $value),
+    'database' => preg_replace("/^.*Database=(.+?);.*$/", "\\1", $value),
+    'username' => preg_replace("/^.*User Id=(.+?);.*$/", "\\1", $value),
+    'password' => preg_replace("/^.*Password=(.+?)$/", "\\1", $value),
+    'port' => $port,
     'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
     'driver' => 'mysql',
+    'prefix' => '',
   ];
+}
+
+function getAzureConnectionString() {
+  $connstr = getenv('MYSQLCONNSTR_MySqlDB');
+
+  if (empty($connstr)) {
+    foreach ($_SERVER as $key => $value) {
+      if (strpos($key, 'MYSQLCONNSTR_') !== 0) {
+        continue;
+      }
+
+      return $value;
+    }
+  }
+
+  return $connstr;
+}
+
+function getDrupalDbInfoFromAzure() {
+  $connectionStr = getAzureConnectionString();
+  return processAzureConnectionString($connectionStr);
+}
+
+if (!isset($databases['default']['default'])) {
+  $databases['default']['default'] = getDrupalDbInfoFromAzure();;
 }
 
 // ---------------------------------------
