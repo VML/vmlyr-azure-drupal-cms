@@ -1,9 +1,0 @@
-langcode: en
-status: true
-dependencies:
-  module:
-    - media
-id: media.embed_grid
-label: 'Embed Grid'
-targetEntityType: media
-cache: true

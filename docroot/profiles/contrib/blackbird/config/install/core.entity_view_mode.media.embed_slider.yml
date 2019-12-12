@@ -1,9 +1,0 @@
-langcode: en
-status: true
-dependencies:
-  module:
-    - media
-id: media.embed_slider
-label: 'Embed Slider'
-targetEntityType: media
-cache: true
